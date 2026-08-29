@@ -1,20 +1,37 @@
-variable "name" { type = string }
-variable "cidr_block" { type = string default = "10.0.0.0/16" }
+variable "name" {
+  type = string
+}
 
-data "aws_availability_zones" "available" { state = "available" }
+variable "cidr_block" {
+  type    = string
+  default = "10.0.0.0/16"
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 resource "aws_vpc" "this" {
   cidr_block           = var.cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = { Name = var.name }
+
+  tags = {
+    Name = var.name
+  }
 }
 
-resource "aws_internet_gateway" "this" { vpc_id = aws_vpc.this.id }
+resource "aws_internet_gateway" "this" {
+  vpc_id = aws_vpc.this.id
+}
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-  route { cidr_block = "0.0.0.0/0" gateway_id = aws_internet_gateway.this.id }
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.this.id
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -23,7 +40,10 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet(var.cidr_block, 8, count.index + 1)
   availability_zone       = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
-  tags = { Name = "${var.name}-public-${count.index + 1}" }
+
+  tags = {
+    Name = "${var.name}-public-${count.index + 1}"
+  }
 }
 
 resource "aws_route_table_association" "public" {
@@ -32,5 +52,10 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-output "vpc_id" { value = aws_vpc.this.id }
-output "public_subnet_ids" { value = aws_subnet.public[*].id }
+output "vpc_id" {
+  value = aws_vpc.this.id
+}
+
+output "public_subnet_ids" {
+  value = aws_subnet.public[*].id
+}
