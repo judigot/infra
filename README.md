@@ -13,6 +13,7 @@ infra/
 ├── blueprints/
 │   └── app/
 │       └── aws/
+│           └── classic/
 ├── deployments/
 ├── hcp/
 │   ├── workspace/
@@ -21,6 +22,12 @@ infra/
 ```
 
 `modules/` contains reusable provider-specific building blocks. `blueprints/` composes those capabilities into opinionated application architectures. `deployments/` contains per-client/app/environment configuration. `hcp/` contains HCP Terraform integration. `scripts/` contains repository automation.
+
+## Classic workflow
+
+The former `judigot/terraform` package-script workflow now lives in `blueprints/app/aws/classic`. The root `package.json` preserves the familiar commands (`dev`, `dev:db`, `start`, `start:db`, PostgreSQL/MySQL database-only variants, Windows, SSH helpers, Terraform lifecycle commands) while the infrastructure implementation lives in this repository.
+
+The classic blueprint is a compatibility layer for the old toggle-driven workflow. New designs should favor explicit app-centric blueprints and reusable provider modules instead of accumulating more boolean switches.
 
 ## Design checklist
 
