@@ -1,1 +1,15 @@
-module "database" { source = "../../../modules/aws/database-rds" name = "${var.name}-db" vpc_id = module.network.vpc_id subnet_ids = module.network.public_subnet_ids app_security_group_id = module.compute.security_group_id engine = "postgresql" engine_version = var.db_engine_version db_name = var.db_name username = var.db_username password = var.db_password instance_class = var.db_instance_class publicly_accessible = var.database_publicly_accessible allowed_cidrs = var.database_allowed_cidrs }
+module "database" {
+  source                     = "../../../modules/aws/database-rds"
+  name                       = "${var.name}-db"
+  vpc_id                     = module.network.vpc_id
+  subnet_ids                 = module.network.public_subnet_ids
+  app_security_group_id      = module.compute.security_group_id
+  engine                     = "postgresql"
+  engine_version             = var.db_engine_version
+  db_name                    = var.db_name
+  username                   = var.db_username
+  password                   = var.db_password
+  instance_class             = var.db_instance_class
+  publicly_accessible        = var.database_publicly_accessible
+  allowed_cidrs              = var.database_allowed_cidrs
+}

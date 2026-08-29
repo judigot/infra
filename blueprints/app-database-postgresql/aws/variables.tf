@@ -1,16 +1,16 @@
-variable "name" { type = string default = "app" }
-variable "region" { type = string default = "us-east-1" }
-variable "instance_type" { type = string default = "t3.small" }
-variable "disk_size" { type = number default = 20 }
-variable "volume_type" { type = string default = "gp3" }
-variable "ssh_key_name" { type = string default = "id_ed25519" }
+variable "name" { type = string }
+variable "region" { type = string }
+variable "instance_type" { type = string }
+variable "disk_size" { type = number }
+variable "volume_type" { type = string }
+variable "ssh_key_name" { type = string }
 variable "ssh_public_key" { type = string sensitive = true }
-variable "ssh_allowed_cidrs" { type = list(string) default = [] }
-variable "app_ports" { type = list(number) default = [80,443,3000,5000,8000,8001,8080,9000,9200] }
-variable "db_engine_version" { type = string default = "16.3" }
-variable "db_name" { type = string default = "app_db" }
-variable "db_username" { type = string default = "app" }
+variable "ssh_allowed_cidrs" { type = list(string) }
+variable "app_ports" { type = list(number) }
+variable "db_engine_version" { type = string }
+variable "db_name" { type = string }
+variable "db_username" { type = string }
 variable "db_password" { type = string sensitive = true }
-variable "db_instance_class" { type = string default = "db.t4g.micro" }
-variable "database_publicly_accessible" { type = bool default = false }
-variable "database_allowed_cidrs" { type = list(string) default = [] }
+variable "db_instance_class" { type = string }
+variable "database_publicly_accessible" { type = bool }
+variable "database_allowed_cidrs" { type = list(string) }

@@ -1,9 +1,9 @@
-variable "name" { type = string default = "app-windows" }
-variable "region" { type = string default = "us-east-1" }
-variable "instance_type" { type = string default = "m7i.xlarge" }
-variable "disk_size" { type = number default = 75 }
-variable "volume_type" { type = string default = "gp3" }
-variable "ssh_key_name" { type = string default = "id_ed25519" }
+variable "name" { type = string }
+variable "region" { type = string }
+variable "instance_type" { type = string }
+variable "disk_size" { type = number }
+variable "volume_type" { type = string }
+variable "ssh_key_name" { type = string }
 variable "ssh_public_key" { type = string sensitive = true }
-variable "rdp_allowed_cidrs" { type = list(string) default = [] }
-variable "app_ports" { type = list(number) default = [] }
+variable "rdp_allowed_cidrs" { type = list(string) }
+variable "app_ports" { type = list(number) }

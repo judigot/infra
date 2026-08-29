@@ -1,9 +1,9 @@
-variable "name" { type = string default = "app" }
-variable "region" { type = string default = "us-east-1" }
-variable "db_engine_version" { type = string default = "16.3" }
-variable "db_name" { type = string default = "app_db" }
-variable "db_username" { type = string default = "app" }
+variable "name" { type = string }
+variable "region" { type = string }
+variable "db_engine_version" { type = string }
+variable "db_name" { type = string }
+variable "db_username" { type = string }
 variable "db_password" { type = string sensitive = true }
-variable "db_instance_class" { type = string default = "db.t4g.micro" }
-variable "database_publicly_accessible" { type = bool default = false }
-variable "database_allowed_cidrs" { type = list(string) default = [] }
+variable "db_instance_class" { type = string }
+variable "database_publicly_accessible" { type = bool }
+variable "database_allowed_cidrs" { type = list(string) }
