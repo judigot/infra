@@ -5,6 +5,9 @@ variable "disk_size" { type = number }
 variable "volume_type" { type = string }
 variable "custom_ami" { type = string }
 variable "ssh_key_name" { type = string }
-variable "ssh_public_key" { type = string sensitive = true }
+variable "ssh_public_key" {
+  type      = string
+  sensitive = true
+}
 variable "ssh_allowed_cidrs" { type = list(string) }
 variable "app_ports" { type = list(number) }
