@@ -48,6 +48,10 @@ id_ed25519*
 application_default_credentials.json
 service-account*.json
 
+# Workspace app clones and generated exports
+workspace/**/app/
+/dist/
+
 # Local editor and OS files
 .DS_Store
 .idea/

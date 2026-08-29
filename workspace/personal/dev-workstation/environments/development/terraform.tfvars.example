@@ -1,0 +1,5 @@
+region           = "us-east-1"
+instance_type    = "m7i.xlarge"
+disk_size        = 10
+volume_type      = "gp3"
+operating_system = "linux"
