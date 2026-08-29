@@ -24,7 +24,9 @@ case "${1:-}" in
   wait-nginx)
     require_ip
     echo "Waiting for nginx..."
-    ssh_run 'cloud-init status --wait >/dev/null 2>&1 && until curl -fsS http://localhost >/dev/null 2>&1; do sleep 1; done'
+    until curl --fail --silent --show-error --max-time 5 "http://$IP" >/dev/null 2>&1; do
+      sleep 2
+    done
     echo "Nginx is up: http://$IP"
     ;;
   connect)
