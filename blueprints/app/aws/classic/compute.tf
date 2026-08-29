@@ -49,7 +49,7 @@ resource "aws_instance" "app" {
     encrypted             = true
   }
 
-  user_data = var.os == "linux" ? templatefile("${path.module}/cloud-init.sh.tftpl", {}) : null
+  user_data = var.os == "linux" ? templatefile("${path.module}/cloud-init.yaml.tftpl", {}) : null
 
   metadata_options {
     http_endpoint = "enabled"
