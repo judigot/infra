@@ -1,1 +1,4 @@
-# VPC, public/private subnets, route tables, and internet egress.
+module "network" {
+  source = "../../../modules/aws/network-vpc"
+  name   = var.name
+}
