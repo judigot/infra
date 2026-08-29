@@ -69,8 +69,18 @@ for file in "$blueprint_dir"/*; do
   esac
 done
 
+# Export only committed-safe examples. Real tfvars can contain secrets and must
+# never be copied into an artifact intended for another repository.
 if [ -d "$workspace_dir/environments" ]; then
-  cp -R "$workspace_dir/environments/." "$output_dir/environments/"
+  for environment_dir in "$workspace_dir"/environments/*; do
+    [ -d "$environment_dir" ] || continue
+    environment=$(basename -- "$environment_dir")
+    mkdir -p "$output_dir/environments/$environment"
+    for file in "$environment_dir"/*.tfvars.example; do
+      [ -f "$file" ] || continue
+      cp "$file" "$output_dir/environments/$environment/"
+    done
+  done
 fi
 
 # Vendor only modules referenced directly by the selected blueprint.
@@ -101,11 +111,12 @@ Selected blueprint: \`blueprints/$blueprint_ref\`
 
 - Root \`*.tf\` files are the materialized blueprint.
 - \`modules/\` contains only referenced reusable modules.
-- \`environments/\` contains environment-specific Terraform variable files.
+- \`environments/\` contains committed-safe environment examples. Keep real tfvars out of Git or manage values in HCP Terraform.
 
 Example:
 
 \`\`\`sh
+cp infra/environments/development/terraform.tfvars.example infra/environments/development/terraform.tfvars
 terraform -chdir=infra init
 terraform -chdir=infra plan -var-file=environments/development/terraform.tfvars
 \`\`\`
