@@ -1,0 +1,11 @@
+aws_region   = "us-east-1"
+client_name  = "test-client"
+environment  = "production"
+domain_name  = "judigot.com"
+instance_type = "t3.small"
+
+# Set only when an EC2 key pair should be attached.
+key_name = null
+
+# Restrict this before enabling SSH in a long-lived deployment.
+ssh_allowed_cidrs = ["0.0.0.0/0"]

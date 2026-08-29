@@ -1,0 +1,56 @@
+# Terraform working directory and local state
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+
+# Terraform variable files may contain secrets
+*.tfvars
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+!*.tfvars.example
+!*.example.tfvars
+
+# Local Terraform overrides and CLI config
+.terraformrc
+terraform.rc
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+*.secret
+*.secrets
+secrets.*
+credentials.*
+
+# Private keys, certificates, and keystores
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# Cloud-provider credential directories/files
+.aws/
+.azure/
+.gcp/
+application_default_credentials.json
+service-account*.json
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
