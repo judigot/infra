@@ -35,43 +35,70 @@ Environment-specific values such as region, operating system, instance type, dat
 
 Each environment directory contains only Terraform variable files. Real `*.tfvars` remain ignored; safe `terraform.tfvars.example` files document the expected values.
 
-## Exporting application infrastructure
+## Workspace layout
 
-A workspace can be finalized into a standalone Terraform directory for its application repository:
+```text
+workspace/<scope>/<app>/
+├── blueprint
+├── app/
+└── environments/
+    ├── development/
+    │   └── terraform.tfvars.example
+    ├── staging/
+    │   └── terraform.tfvars.example
+    └── production/
+        └── terraform.tfvars.example
+```
+
+`blueprint` identifies the architecture/provider combination to materialize. `app/` is an ignored local clone of the application repository and is not part of this repository's source of truth. The environment directories contain only values that vary between deployments.
+
+## Scripts
+
+### Export infrastructure
+
+Use `scripts/export-infra.sh` to turn a workspace into standalone, maintainable Terraform that can live inside the application repository.
 
 ```sh
 ./scripts/export-infra.sh workspace/client-a/app-1
 ```
 
-The result is written to:
+The argument is the workspace path relative to the repository root. The generated artifact is written under `dist/` using the same scope and application name:
 
 ```text
 dist/client-a/app-1/infra/
 ├── modules/
 ├── environments/
+│   ├── development/
+│   │   └── terraform.tfvars.example
+│   ├── staging/
+│   │   └── terraform.tfvars.example
+│   └── production/
+│       └── terraform.tfvars.example
 ├── *.tf
 └── README.md
 ```
 
-The selected blueprint is materialized as root Terraform files. Only modules referenced by that blueprint are copied, so `blueprints/`, other workspaces, unused providers/modules, HCP integration, and repository tooling are not shipped to the application.
+The exporter:
 
-## Legacy `judigot/terraform` migration
+- materializes the selected blueprint as the root Terraform configuration;
+- rewrites local module sources for the exported directory;
+- copies only modules referenced by that blueprint;
+- copies the workspace's committed-safe environment variable examples; and
+- excludes unrelated blueprints, workspaces, providers, HCP integration, repository tooling, and real `*.tfvars` files.
 
-The old package scripts mixed architecture selection with environment configuration. They map to the new model as follows:
+`dist/` is ignored because it is generated output. Copy `dist/<scope>/<app>/infra/` into the target application's repository when the infrastructure definition is ready to be maintained with the application.
 
-| Old command | Architecture | Environment concern |
-| --- | --- | --- |
-| `dev` | `blueprints/app/aws` | development values |
-| `start` | `blueprints/app/aws` | production values |
-| `dev:db` | `blueprints/app-database/aws` | development values |
-| `start:db` | `blueprints/app-database/aws` | production values |
-| `start:db:postgresql` | `blueprints/app-database/aws` | `db_engine = "postgresql"` |
-| `start:db:mysql` | `blueprints/app-database/aws` | `db_engine = "mysql"` |
-| `db:postgresql` | `blueprints/database/aws` | `db_engine = "postgresql"` |
-| `db:mysql` | `blueprints/database/aws` | `db_engine = "mysql"` |
-| `windows` | `blueprints/app/aws` | `operating_system = "windows"` |
+## Terraform usage
 
-Terraform lifecycle commands such as `init`, `plan`, `destroy`, `validate`, `fmt`, and `output` are operational concerns rather than blueprints.
+The exported `infra/` directory is self-contained. Select an environment by passing its variable file to the root Terraform configuration:
+
+```sh
+terraform -chdir=infra init
+terraform -chdir=infra plan -var-file=environments/development/terraform.tfvars
+terraform -chdir=infra apply -var-file=environments/development/terraform.tfvars
+```
+
+Keep real environment values out of Git when they contain secrets. Each application/environment should use isolated Terraform state, such as a dedicated HCP Terraform workspace.
 
 ## Design checklist
 
