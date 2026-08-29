@@ -90,9 +90,10 @@ The exporter:
 
 ## Terraform usage
 
-The exported `infra/` directory is self-contained. Select an environment by passing its variable file to the root Terraform configuration:
+The exported `infra/` directory is self-contained. Create a local `terraform.tfvars` from the committed example for the environment you want to use, then pass it to the root Terraform configuration:
 
 ```sh
+cp infra/environments/development/terraform.tfvars.example infra/environments/development/terraform.tfvars
 terraform -chdir=infra init
 terraform -chdir=infra plan -var-file=environments/development/terraform.tfvars
 terraform -chdir=infra apply -var-file=environments/development/terraform.tfvars
