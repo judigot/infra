@@ -1,0 +1,9 @@
+region            = "us-east-1"
+instance_type     = "t3.small"
+disk_size         = 75
+volume_type       = "gp3"
+operating_system  = "linux"
+db_engine         = "postgresql"
+db_name           = "app_db"
+db_username       = "root"
+db_instance_class = "db.t3.small"

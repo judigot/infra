@@ -1,0 +1,5 @@
+name          = "default-development"
+region        = "us-east-1"
+instance_type = "t3.micro"
+disk_size     = 20
+volume_type   = "gp3"
