@@ -13,39 +13,46 @@ infra/
 ├── blueprints/
 │   ├── app/
 │   ├── app-database/
-│   ├── app-database-postgresql/
-│   ├── app-database-mysql/
-│   ├── app-database-only-postgresql/
-│   ├── app-database-only-mysql/
-│   └── app-windows/
+│   └── database/
 ├── deployments/
+│   └── personal/
+│       ├── dev-workstation/
+│       │   └── development/
+│       └── demo-app/
+│           └── production/
 ├── hcp/
 └── scripts/
 ```
 
-`modules/` contains reusable provider-specific building blocks. `blueprints/` composes those capabilities into application architectures. `deployments/` contains per-client/app/environment configuration. `hcp/` contains HCP Terraform integration. `scripts/` contains repository automation.
+`modules/` contains reusable provider-specific building blocks. `blueprints/` describes architecture/topology. `deployments/` selects a blueprint and supplies concrete app/environment configuration. `hcp/` contains HCP Terraform integration. `scripts/` contains repository automation.
+
+## Design model
+
+- **Module** = reusable implementation, such as AWS VPC, EC2, or RDS.
+- **Blueprint** = architecture/topology, such as app, app + database, or database-only.
+- **Deployment** = one concrete use of a blueprint for an app/environment.
+
+Provider, region, operating system, instance type, database engine/version/class, disk sizing, CIDRs, and other environment-specific choices belong in deployments rather than becoming separate blueprint folders.
 
 ## Legacy `judigot/terraform` migration
 
-The old `package.json` commands represented deployment architectures. They now map to explicit blueprints instead of boolean switches:
+The old package scripts mixed architecture selection with environment configuration. They now map to the new model:
 
-| Old command | New blueprint |
-| --- | --- |
-| `dev` | `blueprints/app/aws` |
-| `start` | `blueprints/app/aws` |
-| `dev:db` | `blueprints/app-database/aws` |
-| `start:db` | `blueprints/app-database/aws` |
-| `start:db:postgresql` | `blueprints/app-database-postgresql/aws` |
-| `start:db:mysql` | `blueprints/app-database-mysql/aws` |
-| `db:postgresql` | `blueprints/app-database-only-postgresql/aws` |
-| `db:mysql` | `blueprints/app-database-only-mysql/aws` |
-| `windows` | `blueprints/app-windows/aws` |
-
-`dev` and `start` share a blueprint because environment is deployment configuration, not architecture. The same applies to `dev:db` and `start:db`.
+| Old command | Architecture | Deployment concern |
+| --- | --- | --- |
+| `dev` | `blueprints/app/aws` | development values |
+| `start` | `blueprints/app/aws` | production values |
+| `dev:db` | `blueprints/app-database/aws` | development values |
+| `start:db` | `blueprints/app-database/aws` | production values |
+| `start:db:postgresql` | `blueprints/app-database/aws` | `db_engine = "postgresql"` |
+| `start:db:mysql` | `blueprints/app-database/aws` | `db_engine = "mysql"` |
+| `db:postgresql` | `blueprints/database/aws` | `db_engine = "postgresql"` |
+| `db:mysql` | `blueprints/database/aws` | `db_engine = "mysql"` |
+| `windows` | `blueprints/app/aws` | `operating_system = "windows"` |
 
 Terraform lifecycle and operator commands such as `init`, `plan`, `destroy`, `validate`, `fmt`, `output`, `ip`, `connect`, `logs`, `status`, `docker`, and `nginx` are operational concerns rather than blueprints.
 
-Real `*.tfvars` files are intentionally ignored. Keep environment/client values under `deployments/` locally or in HCP Terraform workspace variables; only safe `*.tfvars.example` files belong in git.
+Real `*.tfvars` files are intentionally ignored. Deployment folders may contain committed non-secret Terraform root configuration and safe `*.tfvars.example` files, while real values stay local or in HCP Terraform workspace variables.
 
 ## Design checklist
 
