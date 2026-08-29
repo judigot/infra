@@ -11,23 +11,41 @@ infra/
 │   ├── azure/
 │   └── gcp/
 ├── blueprints/
-│   └── app/
-│       └── aws/
-│           └── classic/
+│   ├── app/
+│   ├── app-database/
+│   ├── app-database-postgresql/
+│   ├── app-database-mysql/
+│   ├── app-database-only-postgresql/
+│   ├── app-database-only-mysql/
+│   └── app-windows/
 ├── deployments/
 ├── hcp/
-│   ├── workspace/
-│   └── api/
 └── scripts/
 ```
 
-`modules/` contains reusable provider-specific building blocks. `blueprints/` composes those capabilities into opinionated application architectures. `deployments/` contains per-client/app/environment configuration. `hcp/` contains HCP Terraform integration. `scripts/` contains repository automation.
+`modules/` contains reusable provider-specific building blocks. `blueprints/` composes those capabilities into application architectures. `deployments/` contains per-client/app/environment configuration. `hcp/` contains HCP Terraform integration. `scripts/` contains repository automation.
 
-## Classic workflow
+## Legacy `judigot/terraform` migration
 
-The former `judigot/terraform` package-script workflow now lives in `blueprints/app/aws/classic`. The root `package.json` preserves the familiar commands (`dev`, `dev:db`, `start`, `start:db`, PostgreSQL/MySQL database-only variants, Windows, SSH helpers, Terraform lifecycle commands) while the infrastructure implementation lives in this repository.
+The old `package.json` commands represented deployment architectures. They now map to explicit blueprints instead of boolean switches:
 
-The classic blueprint is a compatibility layer for the old toggle-driven workflow. New designs should favor explicit app-centric blueprints and reusable provider modules instead of accumulating more boolean switches.
+| Old command | New blueprint |
+| --- | --- |
+| `dev` | `blueprints/app/aws` |
+| `start` | `blueprints/app/aws` |
+| `dev:db` | `blueprints/app-database/aws` |
+| `start:db` | `blueprints/app-database/aws` |
+| `start:db:postgresql` | `blueprints/app-database-postgresql/aws` |
+| `start:db:mysql` | `blueprints/app-database-mysql/aws` |
+| `db:postgresql` | `blueprints/app-database-only-postgresql/aws` |
+| `db:mysql` | `blueprints/app-database-only-mysql/aws` |
+| `windows` | `blueprints/app-windows/aws` |
+
+`dev` and `start` share a blueprint because environment is deployment configuration, not architecture. The same applies to `dev:db` and `start:db`.
+
+Terraform lifecycle and operator commands such as `init`, `plan`, `destroy`, `validate`, `fmt`, `output`, `ip`, `connect`, `logs`, `status`, `docker`, and `nginx` are operational concerns rather than blueprints.
+
+Real `*.tfvars` files are intentionally ignored. Keep environment/client values under `deployments/` locally or in HCP Terraform workspace variables; only safe `*.tfvars.example` files belong in git.
 
 ## Design checklist
 
