@@ -1,11 +1,16 @@
 # Deployments
 
-Per-client, per-app, per-environment deployment configuration.
-
-Expected layout:
+Concrete app/environment configuration. Every deployment has the same three environments:
 
 ```text
-<client>/<app>/<environment>/config.tfvars
+<scope>/<app>/
+├── development/
+├── staging/
+└── production/
 ```
 
-Real `.tfvars` files are ignored by Git because they may contain sensitive values.
+`default/` is the repository's basic AWS EC2 deployment and uses `blueprints/app/aws`.
+
+Each environment should map to its own HCP Terraform workspace/state while sharing the deployment's architecture.
+
+Real `.tfvars` files are ignored. Keep sensitive and environment-specific values in HCP Terraform workspace variables or ignored local files.
