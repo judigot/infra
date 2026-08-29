@@ -1,5 +1,5 @@
 # Scripts
 
-Repository automation will live here.
+Repository automation.
 
-Planned commands: `plan`, `apply`, `destroy`, and `export`.
+- `export-infra.sh <workspace-path>` materializes a workspace's selected blueprint and referenced modules into `dist/<workspace>/infra/`.
