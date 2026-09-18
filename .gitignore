@@ -11,8 +11,10 @@ crash.*.log
 *.tfvars.json
 *.auto.tfvars
 *.auto.tfvars.json
+*.tfbackend
 !*.tfvars.example
 !*.example.tfvars
+!*.tfbackend.example
 
 # Local Terraform overrides and CLI config
 .terraformrc
@@ -51,6 +53,8 @@ service-account*.json
 # Workspace app clones and generated exports
 workspace/**/app/
 /dist/
+/.aws-discovery/*
+!/.aws-discovery/.gitkeep
 
 # Local editor and OS files
 .DS_Store
