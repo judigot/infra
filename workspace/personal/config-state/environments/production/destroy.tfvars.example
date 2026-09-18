@@ -1,0 +1,8 @@
+aws_profile   = "admin"
+region        = "us-east-2"
+bucket_name   = "template-monorepo-terraform-state"
+force_destroy = true
+tags = {
+  Environment = "shared"
+  Project     = "template-monorepo"
+}
