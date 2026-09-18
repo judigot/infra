@@ -16,6 +16,11 @@ variable "force_destroy" {
   default     = false
   description = "Delete every state object and version when destroying the bucket. Enable only for explicit teardown."
 }
+variable "noncurrent_version_retention_days" {
+  type        = number
+  default     = 90
+  description = "Retain historical state versions for recovery."
+}
 
 resource "aws_s3_bucket" "state" {
   bucket        = var.bucket_name
@@ -26,6 +31,18 @@ resource "aws_s3_bucket" "state" {
 resource "aws_s3_bucket_versioning" "state" {
   bucket = aws_s3_bucket.state.id
   versioning_configuration { status = "Enabled" }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+  rule {
+    id     = "retain-state-history"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration {
+      noncurrent_days = var.noncurrent_version_retention_days
+    }
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "state" {

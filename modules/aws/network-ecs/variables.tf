@@ -6,3 +6,11 @@ variable "single_nat_gateway" {
   type    = bool
   default = true
 }
+variable "enable_flow_logs" {
+  type    = bool
+  default = true
+}
+variable "flow_log_retention_days" {
+  type    = number
+  default = 30
+}

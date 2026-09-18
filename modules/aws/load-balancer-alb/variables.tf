@@ -29,3 +29,7 @@ variable "deletion_protection" {
   type    = bool
   default = false
 }
+variable "access_log_retention_days" {
+  type    = number
+  default = 30
+}

@@ -9,6 +9,9 @@ This blueprint deploys a testable containerized application on ECS Fargate:
 - private S3 frontend storage behind CloudFront Origin Access Control;
 - a `us-east-1` ACM certificate and Route 53 A/AAAA aliases for the frontend;
 - security response headers, compressed caching, and SPA route fallback.
+- WAF managed common rules and IP rate limits at both CloudFront and the ALB;
+- VPC flow logs, ALB access logs, and ECS/ALB CloudWatch alarms;
+- lifecycle retention for access logs, state history, and tagged ECR releases.
 
 The defaults run a public nginx Alpine image as an HTTP-only smoke test; this
 does not deploy template-monorepo. The health check requires wget in the image.
@@ -32,9 +35,11 @@ alarm_actions with notification topic ARNs to receive alerts. Untagged ECR image
 expire after seven days; tagged images are retained for rollback and need a
 separate release-retention policy. NAT, ALB, tasks, and logs incur ongoing charges.
 
-This is a disposable test blueprint, not a complete production baseline yet.
-Before production use, add per-AZ egress, appropriate edge protection, alarm
-notifications, deployment identity, remote state locking, and a tested rollback
-path. Validate application and frontend delivery with Terraform. Do not use
+The hardening defaults are designed for a small production deployment while
+retaining the explicit `production_mode` switch: production uses one NAT
+gateway per AZ and protects deletion, while disposable environments can still
+use a single NAT gateway and controlled teardown.
+
+Validate application and frontend delivery with Terraform. Do not use
 an EC2 init script for application setup; container images and explicit ECS
 deployment tasks are the repeatable bootstrap boundary.

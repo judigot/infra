@@ -106,6 +106,57 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 
 data "aws_cloudfront_cache_policy" "optimized" { name = "Managed-CachingOptimized" }
 
+resource "aws_wafv2_web_acl" "frontend" {
+  provider = aws.us_east_1
+  name     = "${var.name}-frontend"
+  scope    = "CLOUDFRONT"
+  default_action {
+    allow {}
+  }
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "${var.name}-frontend-waf"
+    sampled_requests_enabled   = true
+  }
+  rule {
+    name     = "aws-managed-common-rules"
+    priority = 1
+    override_action {
+      none {}
+    }
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesCommonRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.name}-frontend-common-rules"
+      sampled_requests_enabled   = true
+    }
+  }
+  rule {
+    name     = "rate-limit-ip"
+    priority = 2
+    action {
+      block {}
+    }
+    statement {
+      rate_based_statement {
+        limit              = 2000
+        aggregate_key_type = "IP"
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.name}-frontend-rate-limit"
+      sampled_requests_enabled   = true
+    }
+  }
+  tags = var.tags
+}
+
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -113,6 +164,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
   wait_for_deployment = true
+  web_acl_id          = aws_wafv2_web_acl.frontend.arn
   tags                = var.tags
 
   origin {
