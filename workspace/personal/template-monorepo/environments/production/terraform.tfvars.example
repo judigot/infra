@@ -1,0 +1,5 @@
+region           = "us-east-1"
+instance_type    = "t3.small"
+disk_size        = 75
+volume_type      = "gp3"
+operating_system = "linux"
