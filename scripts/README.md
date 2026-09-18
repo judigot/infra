@@ -2,6 +2,26 @@
 
 Repository automation for building and exporting application infrastructure.
 
+## `discover-aws.sh`
+
+Reads non-secret account metadata using the selected AWS CLI profile, writes
+JSON inventory files, and prints a concise summary with tables. It does not
+print or store credentials.
+
+```sh
+make discover
+```
+
+The output directory contains account, DNS, networking, ECR, CloudTrail,
+GuardDuty, Security Hub, EC2, RDS, S3 bucket, and Terraform state-object discovery results, plus
+value-oriented files such as `dns-values.json`, `vpc-values.json`, `subnet-values.json`, and
+`availability-zone-values.json`. Route 53 record sets are stored per hosted
+zone under `dns-records/`. The terminal output includes DNS records, IDs,
+CIDRs, nameservers, and availability zones an engineer commonly needs for tfvars.
+S3 state discovery records object metadata under `s3-tfstate/`; it never
+downloads Terraform state contents because state can contain secrets.
+Review it before applying a `config-*` or application blueprint.
+
 ## `export-infra.sh`
 
 Materializes a workspace into standalone Terraform suitable for the application's own repository.

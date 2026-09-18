@@ -51,7 +51,18 @@ blueprint_dir="$repo_root/blueprints/$blueprint_ref"
 output_rel=${workspace_rel#workspace/}
 output_dir="$repo_root/dist/$output_rel/infra"
 
-rm -rf -- "$output_dir"
+# Regeneration must never erase state, operator tfvars, or local edits. Build a
+# fresh artifact and retain the previous directory beside it for inspection.
+if [ -e "$output_dir" ]; then
+  operational_files=$(find "$output_dir" \( -name '*.tfstate*' -o -name '*.tfvars' -o -name '*.tfvars.json' -o -name '.terraform' -o -name '.terraform.lock.hcl' -o -name '*.tfplan' \) -print -quit)
+  if [ -n "$operational_files" ]; then
+    echo "Refusing to replace an initialized export or operator data. Move the deployment to a durable directory first." >&2
+    exit 1
+  fi
+  previous_dir=$(mktemp -d "$repo_root/dist/$output_rel/infra.previous.XXXXXX")
+  mv -- "$output_dir" "$previous_dir/infra"
+  printf 'Preserved previous export at %s/infra\n' "$previous_dir"
+fi
 mkdir -p "$output_dir/environments"
 
 # Materialize the selected blueprint as the exported Terraform root. Blueprint
@@ -77,6 +88,10 @@ if [ -d "$workspace_dir/environments" ]; then
     environment=$(basename -- "$environment_dir")
     mkdir -p "$output_dir/environments/$environment"
     for file in "$environment_dir"/*.tfvars.example; do
+      [ -f "$file" ] || continue
+      cp "$file" "$output_dir/environments/$environment/"
+    done
+    for file in "$environment_dir"/*.tfbackend.example; do
       [ -f "$file" ] || continue
       cp "$file" "$output_dir/environments/$environment/"
     done
@@ -106,6 +121,13 @@ cat > "$output_dir/README.md" <<EOF
 # Infrastructure
 
 Standalone Terraform infrastructure exported from \`$workspace_rel\`.
+
+This directory is a generated artifact. Copy it into the application repository
+before initialization. Never apply directly from dist. Re-export preserves the
+previous artifact in an adjacent infra.previous.* directory.
+
+Configure a separate remote backend key or HCP Terraform workspace for each
+environment before applying. Selecting a different var-file does not isolate state.
 
 Selected blueprint: \`blueprints/$blueprint_ref\`
 
