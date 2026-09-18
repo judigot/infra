@@ -1,0 +1,6 @@
+bucket       = "template-monorepo-terraform-state"
+key          = "template-monorepo/production/terraform.tfstate"
+region       = "us-east-2"
+profile      = "admin"
+encrypt      = true
+use_lockfile = true

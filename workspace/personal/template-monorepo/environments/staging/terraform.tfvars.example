@@ -1,5 +1,27 @@
-region           = "us-east-1"
-instance_type    = "t3.small"
-disk_size        = 75
-volume_type      = "gp3"
-operating_system = "linux"
+name             = "template-monorepo-staging"
+aws_profile      = "admin"
+region           = "us-east-2"
+vpc_cidr         = "10.43.0.0/16"
+availability_zones = ["us-east-2a", "us-east-2b"]
+# HTTP-only smoke test. Replace with the application's digest-pinned image for deployment.
+container_image   = "public.ecr.aws/docker/library/nginx:stable-alpine"
+container_port    = 80
+health_check_path = "/"
+desired_count    = 1
+max_capacity     = 1
+cpu              = 256
+memory           = 512
+production_mode  = false
+health_check_command     = ["CMD-SHELL", "wget -qO- http://127.0.0.1:80/ || exit 1"]
+container_user           = ""
+readonly_root_filesystem = false
+alarm_actions            = []
+# To enable TLS, set both domain_name = "judigot.com" and its actual hosted zone ID.
+domain_name      = "judigot.com"
+route53_zone_id  = "Z0128623DD03D66BVCVR"
+api_subdomain    = "api.staging.template-monorepo"
+tags = {
+  Environment = "staging"
+  Project     = "template-monorepo"
+}
+# These are smoke-test settings even in this directory, not production approval.
