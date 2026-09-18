@@ -19,3 +19,7 @@ variable "readonly_root_filesystem" {
   type    = bool
   default = false
 }
+variable "container_environment" {
+  type    = map(string)
+  default = {}
+}

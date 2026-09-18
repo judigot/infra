@@ -6,15 +6,19 @@ This blueprint deploys a testable containerized application on ECS Fargate:
 - ECR with immutable image tags and scan-on-push;
 - CloudWatch container logs and ECS Container Insights;
 - optional ACM and Route 53 DNS for `api.template-monorepo.judigot.com`;
-- optional S3/CloudFront is intentionally deferred until the frontend build and
-  bucket deployment pipeline are defined.
+- private S3 frontend storage behind CloudFront Origin Access Control;
+- a `us-east-1` ACM certificate and Route 53 A/AAAA aliases for the frontend;
+- security response headers, compressed caching, and SPA route fallback.
 
 The defaults run a public nginx Alpine image as an HTTP-only smoke test; this
 does not deploy template-monorepo. The health check requires wget in the image.
 For an application deployment, build and publish the API image first, then set
 its digest-pinned reference, container port, and health path. Terraform does not
-build or publish images. Set both domain_name and route53_zone_id to enable TLS;
+build or publish application artifacts. Set both domain_name and route53_zone_id to enable TLS;
 HTTP then redirects to HTTPS. Give each environment a distinct api_subdomain.
+Set `frontend_domain_name` to the Route 53 apex or a dedicated environment
+hostname. The workspace apply script builds and publishes the Vite bundle after
+Terraform provisions its private bucket and CloudFront distribution.
 
 Copy the export into a durable application checkout before initializing Terraform.
 Configure isolated remote state for each environment (dedicated HCP workspaces
@@ -31,6 +35,6 @@ separate release-retention policy. NAT, ALB, tasks, and logs incur ongoing charg
 This is a disposable test blueprint, not a complete production baseline yet.
 Before production use, add per-AZ egress, appropriate edge protection, alarm
 notifications, deployment identity, remote state locking, and a tested rollback
-path. Complete application and frontend delivery and validate with Terraform. Do not use
+path. Validate application and frontend delivery with Terraform. Do not use
 an EC2 init script for application setup; container images and explicit ECS
 deployment tasks are the repeatable bootstrap boundary.

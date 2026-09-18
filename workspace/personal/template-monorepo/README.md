@@ -12,6 +12,10 @@ The apply pipeline verifies the Terraform state bucket, creates it through the
 `config-state` workspace when missing, bootstraps ECR, builds the Bun/Hono API,
 pushes the commit-tagged image, records its immutable digest in an ignored
 environment file, and applies the complete ECS deployment from a saved plan.
+It then builds the Vite app with the Terraform API URL, publishes immutable
+assets to a private S3 bucket, uploads non-cached HTML, and invalidates the
+CloudFront distribution. The development environment serves the frontend at
+`https://judigot.com`.
 The image tag combines the Git revision and a source-content fingerprint, so
 committed and in-progress application changes cannot collide in immutable ECR.
 The Terraform apply is non-interactive.

@@ -20,6 +20,19 @@ module "domain" {
   zone_id       = var.route53_zone_id
   tags          = local.tags
 }
+module "frontend" {
+  count  = var.frontend_domain_name != "" ? 1 : 0
+  source = "../../../modules/aws/frontend-cloudfront"
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+  name          = var.name
+  domain_name   = var.frontend_domain_name
+  zone_id       = var.route53_zone_id
+  force_destroy = !var.production_mode
+  tags          = local.tags
+}
 resource "terraform_data" "configuration" {
   lifecycle {
     precondition {
@@ -35,6 +48,10 @@ resource "terraform_data" "configuration" {
       error_message = "Set both domain_name and a real route53_zone_id, or leave both empty for the HTTP smoke test."
     }
     precondition {
+      condition     = var.frontend_domain_name == "" || (var.domain_name != "" && var.route53_zone_id != "")
+      error_message = "The frontend domain requires the same Route 53 zone and TLS domain configuration as the API."
+    }
+    precondition {
       condition     = contains(keys(local.fargate_memory), tostring(var.cpu)) && contains(lookup(local.fargate_memory, tostring(var.cpu), []), var.memory)
       error_message = "Select a supported Fargate CPU/memory combination (256-4096 CPU units)."
     }
@@ -45,6 +62,7 @@ module "compute" {
   health_check_command     = var.health_check_command
   container_user           = var.container_user
   readonly_root_filesystem = var.readonly_root_filesystem
+  container_environment    = var.frontend_domain_name != "" ? { CORS_ORIGINS = "https://${var.frontend_domain_name}" } : {}
   source                   = "../../../modules/aws/compute-ecs"
   name                     = var.name
   region                   = var.region
