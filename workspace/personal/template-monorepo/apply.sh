@@ -71,7 +71,7 @@ source_digest=$(
     | sha256sum \
     | cut -c1-12
 )
-image_tag="$git_revision-$source_digest"
+image_tag="release-$git_revision-$source_digest"
 
 printf 'Building application image %s:%s...\n' "$repository_url" "$image_tag"
 docker build --pull --tag "$repository_url:$image_tag" "$app_dir"
