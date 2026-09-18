@@ -35,7 +35,7 @@ export:
 	./scripts/export-infra.sh "$(WORKSPACE)"
 
 prepare:
-	@test -d "$(OUTPUT_DIR)" || ./scripts/export-infra.sh "$(WORKSPACE)"
+	./scripts/export-infra.sh "$(WORKSPACE)" --refresh
 
 fmt:
 	terraform fmt -recursive blueprints modules

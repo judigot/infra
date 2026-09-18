@@ -2,11 +2,17 @@
 set -eu
 
 usage() {
-  echo "Usage: $0 workspace/<scope>/<app>" >&2
+  echo "Usage: $0 workspace/<scope>/<app> [--refresh]" >&2
   exit 2
 }
 
-[ "$#" -eq 1 ] || usage
+[ "$#" -ge 1 ] && [ "$#" -le 2 ] || usage
+
+refresh=false
+if [ "$#" -eq 2 ]; then
+  [ "$2" = "--refresh" ] || usage
+  refresh=true
+fi
 
 case "$1" in
   workspace/*) ;;
@@ -53,7 +59,7 @@ output_dir="$repo_root/dist/$output_rel/infra"
 
 # Regeneration must never erase state, operator tfvars, or local edits. Build a
 # fresh artifact and retain the previous directory beside it for inspection.
-if [ -e "$output_dir" ]; then
+if [ -e "$output_dir" ] && [ "$refresh" = false ]; then
   operational_files=$(find "$output_dir" \( -name '*.tfstate*' -o -name '*.tfvars' -o -name '*.tfvars.json' -o -name '.terraform' -o -name '.terraform.lock.hcl' -o -name '*.tfplan' \) -print -quit)
   if [ -n "$operational_files" ]; then
     echo "Refusing to replace an initialized export or operator data. Move the deployment to a durable directory first." >&2
@@ -113,7 +119,7 @@ if [ -n "$module_refs" ]; then
     }
     target_dir="$output_dir/modules/$module_ref"
     mkdir -p "$(dirname -- "$target_dir")"
-    cp -R "$source_dir" "$target_dir"
+    cp -R "$source_dir"/. "$target_dir"/
   done
 fi
 

@@ -105,7 +105,9 @@ The exporter:
 
 The root `Makefile` is the supported entrypoint for discovery, export, plan,
 and apply. It runs Terraform from `dist/` while protecting initialized exports
-from accidental regeneration. The exporter refuses to replace a directory
+from accidental regeneration. Make targets refresh generated Terraform source
+and referenced modules in place while preserving initialized backend data,
+saved plans, and operator files. A manual export refuses to replace a directory
 containing Terraform state, initialized provider files, real tfvars, or saved
 plans. For ordinary regeneration it preserves the previous export in an
 adjacent `infra.previous.*` directory rather than deleting it.
