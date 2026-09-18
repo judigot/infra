@@ -51,6 +51,10 @@ resource "aws_ecs_task_definition" "api" {
     }
     stopTimeout  = 60
     portMappings = [{ containerPort = var.container_port, protocol = "tcp" }]
+    environment = [for key, value in var.container_environment : {
+      name  = key
+      value = value
+    }]
     healthCheck = {
       command     = length(var.health_check_command) > 0 ? var.health_check_command : ["CMD-SHELL", "wget -qO- http://127.0.0.1:${var.container_port}${var.health_check_path} || exit 1"]
       interval    = 30

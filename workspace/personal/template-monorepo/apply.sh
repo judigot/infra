@@ -20,7 +20,7 @@ esac
 
 cd "$repo_root"
 
-for command_name in aws cut docker git jq make sha256sum sort terraform xargs; do
+for command_name in aws bun cut docker git jq make sha256sum sort terraform xargs; do
   command -v "$command_name" >/dev/null 2>&1 || {
     printf 'Required command is not installed: %s\n' "$command_name" >&2
     exit 1
@@ -131,5 +131,44 @@ make apply \
   AWS_PROFILE="$aws_profile" \
   AWS_REGION="$aws_region"
 
+terraform_dir="$repo_root/dist/personal/template-monorepo/infra"
+api_url=$(terraform -chdir="$terraform_dir" output -raw api_url)
+frontend_url=$(terraform -chdir="$terraform_dir" output -raw frontend_url)
+frontend_bucket=$(terraform -chdir="$terraform_dir" output -raw frontend_bucket_name)
+frontend_distribution=$(terraform -chdir="$terraform_dir" output -raw frontend_distribution_id)
+
+printf 'Building Vite frontend for %s...\n' "$api_url"
+(
+  cd "$app_dir"
+  bun install --frozen-lockfile
+  VITE_API_URL="$api_url" bun run build:vite
+)
+
+printf 'Publishing frontend to %s...\n' "$frontend_url"
+aws s3 sync "$app_dir/apps/vite/dist" "s3://$frontend_bucket" \
+  --delete \
+  --exclude 'assets/*' \
+  --exclude index.html \
+  --cache-control 'no-cache' \
+  --profile "$aws_profile" \
+  --region "$aws_region"
+aws s3 sync "$app_dir/apps/vite/dist/assets" "s3://$frontend_bucket/assets" \
+  --delete \
+  --cache-control 'public,max-age=31536000,immutable' \
+  --profile "$aws_profile" \
+  --region "$aws_region"
+aws s3 cp "$app_dir/apps/vite/dist/index.html" "s3://$frontend_bucket/index.html" \
+  --cache-control 'no-cache' \
+  --content-type 'text/html; charset=utf-8' \
+  --profile "$aws_profile" \
+  --region "$aws_region"
+aws cloudfront create-invalidation \
+  --distribution-id "$frontend_distribution" \
+  --paths '/*' \
+  --profile "$aws_profile" \
+  --region us-east-1 \
+  --output text \
+  --query 'Invalidation.Id'
+
 printf 'Deployment complete. Terraform outputs:\n'
-terraform -chdir="$repo_root/dist/personal/template-monorepo/infra" output
+terraform -chdir="$terraform_dir" output

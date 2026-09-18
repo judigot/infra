@@ -20,6 +20,7 @@ alarm_actions            = []
 domain_name      = "judigot.com"
 route53_zone_id  = "Z0128623DD03D66BVCVR"
 api_subdomain    = "api.template-monorepo"
+frontend_domain_name = "template-monorepo.judigot.com"
 tags = {
   Environment = "production"
   Project     = "template-monorepo"

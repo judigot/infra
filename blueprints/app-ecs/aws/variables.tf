@@ -89,6 +89,16 @@ variable "api_subdomain" {
   default = "api"
 }
 
+variable "frontend_domain_name" {
+  type        = string
+  default     = ""
+  description = "Fully qualified frontend hostname. Use the zone apex to serve the frontend from the plain domain."
+  validation {
+    condition     = var.frontend_domain_name == "" || can(regex("^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$", var.frontend_domain_name))
+    error_message = "Provide a lowercase fully qualified domain name or leave it empty to disable the frontend."
+  }
+}
+
 variable "production_mode" {
   type        = bool
   default     = false
