@@ -4,6 +4,7 @@ module "network" {
   vpc_cidr           = var.vpc_cidr
   availability_zones = local.azs
   single_nat_gateway = !var.production_mode
+  enable_flow_logs   = true
   tags               = local.tags
 }
 module "registry" {

@@ -13,15 +13,27 @@ resource "aws_cloudwatch_log_group" "api" {
 
 resource "aws_ecr_lifecycle_policy" "api" {
   repository = aws_ecr_repository.api.name
-  policy = jsonencode({ rules = [{
-    rulePriority = 1
-    description  = "Remove untagged images after 7 days; preserve tagged rollback images"
-    selection = {
-      tagStatus   = "untagged"
-      countType   = "sinceImagePushed"
-      countUnit   = "days"
-      countNumber = 7
+  policy = jsonencode({ rules = [
+    {
+      rulePriority = 1
+      description  = "Remove untagged images after 7 days"
+      selection = {
+        tagStatus   = "untagged"
+        countType   = "sinceImagePushed"
+        countUnit   = "days"
+        countNumber = 7
+      }
+      action = { type = "expire" }
+    },
+    {
+      rulePriority = 2
+      description  = "Retain the 30 most recent tagged release images"
+      selection = {
+        tagStatus   = "tagged"
+        countType   = "imageCountMoreThan"
+        countNumber = 30
+      }
+      action = { type = "expire" }
     }
-    action = { type = "expire" }
-  }] })
+  ] })
 }
