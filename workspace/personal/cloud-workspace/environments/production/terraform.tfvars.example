@@ -1,0 +1,10 @@
+aws_profile = "admin"
+region      = "us-east-2"
+domain_name = "judigot.com"
+workspace_cnames = ["dev"]
+ttl = 60
+tags = {
+  Environment = "production"
+  Project     = "cloud-workspace"
+  ManagedBy   = "terraform"
+}
